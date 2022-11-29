@@ -1,0 +1,52 @@
+@import "../node_modules/bulma/bulma.sass";
+
+.highlight-editable textarea, .highlight-editable {
+    border: none;
+    outline: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    resize: none;
+    background: transparent;
+    color: currentColor;
+    padding: 0;
+    font-weight: $code-weight;
+    font-size: $pre-code-font-size;
+    -moz-osx-font-smoothing: auto;
+    -webkit-font-smoothing: auto;
+    font-family: $code-family;
+    line-height: $body-line-height;
+    word-wrap: normal;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.highlight {
+    position: relative;
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+.flex-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: justify-content;
+    gap: 10px;
+    align-items: stretch;
+    align-content: stretch;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.flex-wrapper nav, .flex-inner {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: stretch;
+    align-items: stretch;
+    align-content: stretch;
+}
