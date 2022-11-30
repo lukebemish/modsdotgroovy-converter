@@ -138,8 +138,14 @@ class App extends React.Component {
     const lang = this.state.lang;
     const output = document.querySelector('#output');
     if (lang === 'toml') {
+      let parsed = {};
       try {
-        const parsed = parseTOML(input);
+        parsed = parseTOML(input);
+      } catch (e) {
+        console.log(e);
+        output.innerText = "Could not parse TOML.";
+        return;
+      }
         let outString = `ModsDotGroovy.make {
     modLoader = "${parsed.modLoader}"
     loaderVersion = "${parsed.loaderVersion}"
@@ -214,11 +220,7 @@ ${element.description}"""` : ''}${element.logoFile ? `
       }).join("\n    ") : ""
     }
 }`
-        output.innerHTML = hljs.highlight(outString, {language: 'groovy'}).value;
-      } catch (e) {
-        console.log(e);
-        output.innerText = "Could not parse TOML.";
-      }
+      output.innerHTML = hljs.highlight(outString, {language: 'groovy'}).value;
       return;
     } else if (lang === 'json') {
       output.innerText = "Conversion from JSON is not supported yet.";
