@@ -7,6 +7,38 @@ import { parse as parseTOML } from 'toml';
 const hljs = require('highlight.js/lib/core');
 hljs.registerLanguage('groovy', require('highlight.js/lib/languages/groovy'));
 
+function assembleMapFromObject(obj, prefix) {
+  let out = '[\n'
+  for (const [key, value] of Object.entries(obj)) {
+    if (Array.isArray(value)) {
+      out += prefix+'    "'+key + '": "' +assembleListFromArray(value, '    '+prefix)+",\n"
+    } else if (typeof value === 'object') {
+      out += prefix+'    "'+key + '": "' +assembleMapFromObject(value, '    '+prefix)+",\n"
+    } else if (typeof value === 'string') {
+      out += prefix+'    "'+key + '": "' + value + '",\n'
+    }else {
+      out += prefix+'    "'+key + '": ' + value + ',\n'
+    }
+  }
+  return out.substring(0,out.length-1) + '\n'+prefix+']'
+}
+
+function assembleListFromArray(arr, prefix) {
+  let out = '[\n'
+  for (const value of arr) {
+    if (Array.isArray(value)) {
+      out += prefix+'    '+assembleListFromArray(value, '    '+prefix)+",\n"
+    } else if (typeof value === 'object') {
+      out += prefix+'    '+assembleMapFromObject(value, '    '+prefix)+",\n"
+    } else if (typeof value === 'string') {
+      out += prefix+'    "' + value + '",\n'
+    }else {
+      out += prefix+'    '+value + ',\n'
+    }
+  }
+  return out.substring(0,out.length-1) + '\n'+prefix+']'
+}
+
 class InputHighlighted extends React.Component {
   constructor(props) {
     super(props);
@@ -103,18 +135,89 @@ class App extends React.Component {
     if (lang === 'toml') {
       try {
         const parsed = parseTOML(input);
+        console.log(parsed);
         let outString = `ModsDotGroovy.make {
     modLoader = "${parsed.modLoader}"
     loaderVersion = "${parsed.loaderVersion}"
     license = "${parsed.license}"${parsed.issueTrackerUrl ? `
     issueTrackerUrl = "${parsed.issueTrackerUrl}"` : ''}${parsed.showAsResourcePack ? `
-    showAsResourcePack = "${parsed.showAsResourcePack}"` : ''}
+    showAsResourcePack = ${parsed.showAsResourcePack}` : ''}${
+      parsed.mods ? "\n    "+parsed.mods.map(element => {
+        return `mod {
+        modId = "${element.modId}"
+        version = "${element.version ? element.version : '1'}"${element.displayName ? `
+        displayName = "${element.displayName}"` : ''}${element.description ? `
+        description = """
+${element.description}"""` : ''}${element.logoFile ? `
+        logoFile = "${element.logoFile}"` : ''}${element.logoBlur ? `
+        logoBlur = ${element.logoBlur}` : ''}${element.credits ? `
+        credits = "${element.credits}"` : ''}${element.authors ? `
+        authors = [${element.authors.split(/(, and )|(, )|(and )/).map(author => author.trim()).filter(n => n).map(author => `"${author}"`).join(', ')}]` : ''}${element.displayURL ? `
+        displayUrl = "${element.displayURL}"` : ''}${element.updateJSONURL ? `
+        updateJsonUrl = "${element.updateJSONURL}"` : ''}${element.modproperties ? `
+        properties = ${assembleMapFromObject(element.modproperties, '        ')}` : ''}${parsed.dependencies && parsed.dependencies[element.modId] ? `
+        dependencies {
+            ${parsed.dependencies[element.modId].map(dependency => {
+              let modId = dependency.modId;
+              let ordering = ""
+              switch (dependency.ordering) {
+                case "NONE":
+                  ordering = "DependencyOrdering.NONE"
+                  break;
+                case "BEFORE":
+                  ordering = "DependencyOrdering.BEFORE"
+                  break;
+                case "AFTER":
+                  ordering = "DependencyOrdering.AFTER"
+                  break;
+              }
+              let side = ""
+              switch (dependency.side) {
+                case "BOTH":
+                  side = "DependencySide.BOTH"
+                  break;
+                case "CLIENT":
+                  side = "DependencySide.CLIENT"
+                  break;
+                case "SERVER":
+                  side = "DependencySide.SERVER"
+                  break;
+              }
+              if (modId === "minecraft") {
+                return `minecraft {
+                version = this.minecraftVersionRange${dependency.side && dependency.side !== 'BOTH' ? `
+                side = ${side}` : ''}${dependency.mandatory !== null && !dependency.mandatory ? `
+                mandatory = ${dependency.mandatory}` : ''}${dependency.ordering && dependency.ordering !== 'NONE' ? `
+                ordering = ${ordering}` : ''}
+            }`
+              } else if (modId === "forge") {
+                return `forge {
+                  version = ">=\${this.forgeVersion}"${dependency.side && dependency.side !== 'BOTH' ? `
+                  side = ${side}` : ''}${dependency.mandatory !== null && !dependency.mandatory ? `
+                  mandatory = ${dependency.mandatory}` : ''}${dependency.ordering && dependency.ordering !== 'NONE' ? `
+                  ordering = ${ordering}` : ''}
+            }`
+              }
+              return `mod("${modId}") {
+                version = "${dependency.versionRange ? dependency.versionRange : ""}"${dependency.side && dependency.side !== 'BOTH' ? `
+                side = ${side}` : ''}${dependency.mandatory !== null && !dependency.mandatory ? `
+                mandatory = ${dependency.mandatory}` : ''}${dependency.ordering && dependency.ordering !== 'NONE' ? `
+                ordering = ${ordering}` : ''}
+            }`
+            }).join('\n            ')}
+        }` : ''}
+    }`
+      }).join("\n    ") : ""
+    }
 }`
         output.innerHTML = hljs.highlight(outString, {language: 'groovy'}).value;
       } catch (e) {
         console.log(e);
         output.innerText = "Could not parse TOML.";
       }
+      return;
+    } else if (lang === 'json') {
+      output.innerText = "Conversion from JSON is not supported yet.";
       return;
     }
     output.innerHTML = "Unknown language \""+lang+"\"; something has gone terribly wrong";
@@ -137,7 +240,7 @@ class App extends React.Component {
           </Tabs>
           <Button onClick={this.convert}>{"Convert"}</Button>
         </Panel>
-        <Panel>
+        <Panel style={{overflow: "auto"}}>
           <Panel.Header>
             {"Output"}
           </Panel.Header>
