@@ -3,6 +3,11 @@ import 'highlight.js/styles/atom-one-light.css';
 import { Button, Panel } from 'react-bulma-components';
 import React from 'react';
 import { parse as parseTOML } from 'toml';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
+
+library.add(faGithub)
 
 const hljs = require('highlight.js/lib/core');
 hljs.registerLanguage('groovy', require('highlight.js/lib/languages/groovy'));
@@ -249,6 +254,12 @@ ${element.description}"""` : ''}${element.logoFile ? `
               {"// Output goes here."}
             </code>
           </pre>
+          <Panel.Block renderAs='a' href='https://github.com/lukebemish/modsdotgroovy-converter/'>
+            <Panel.Icon>
+              <FontAwesomeIcon icon="fa-brands fa-github"/>
+            </Panel.Icon>
+            View Source on GitHub
+          </Panel.Block>
         </Panel>
       </div>
     );
