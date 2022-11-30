@@ -140,7 +140,6 @@ class App extends React.Component {
     if (lang === 'toml') {
       try {
         const parsed = parseTOML(input);
-        console.log(parsed);
         let outString = `ModsDotGroovy.make {
     modLoader = "${parsed.modLoader}"
     loaderVersion = "${parsed.loaderVersion}"
@@ -157,7 +156,7 @@ ${element.description}"""` : ''}${element.logoFile ? `
         logoFile = "${element.logoFile}"` : ''}${element.logoBlur ? `
         logoBlur = ${element.logoBlur}` : ''}${element.credits ? `
         credits = "${element.credits}"` : ''}${element.authors ? `
-        authors = [${element.authors.split(/(, and )|(, )|(and )/).map(author => author.trim()).filter(n => n).map(author => `"${author}"`).join(', ')}]` : ''}${element.displayURL ? `
+        authors = [${element.authors.split(/, and |, | and /).filter(author => author).map(author => author.trim()).filter(n => n).map(author => `"${author}"`).join(', ')}]` : ''}${element.displayURL ? `
         displayUrl = "${element.displayURL}"` : ''}${element.updateJSONURL ? `
         updateJsonUrl = "${element.updateJSONURL}"` : ''}${element.modproperties ? `
         properties = ${assembleMapFromObject(element.modproperties, '        ')}` : ''}${parsed.dependencies && parsed.dependencies[element.modId] ? `
