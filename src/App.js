@@ -15,14 +15,18 @@ hljs.registerLanguage('groovy', require('highlight.js/lib/languages/groovy'));
 function assembleMapFromObject(obj, prefix) {
   let out = '[\n'
   for (const [key, value] of Object.entries(obj)) {
+    let keyVal = prefix+'    '+key+': '
+    if (!key.match(/^[a-zA-Z_][a-zA-Z0-9_$]*$/)) {
+      keyVal = prefix+'    "'+key+'": '
+    }
     if (Array.isArray(value)) {
-      out += prefix+'    "'+key + '": "' +assembleListFromArray(value, '    '+prefix)+",\n"
+      out += keyVal +assembleListFromArray(value, '    '+prefix)+",\n"
     } else if (typeof value === 'object') {
-      out += prefix+'    "'+key + '": "' +assembleMapFromObject(value, '    '+prefix)+",\n"
+      out += keyVal +assembleMapFromObject(value, '    '+prefix)+",\n"
     } else if (typeof value === 'string') {
-      out += prefix+'    "'+key + '": "' + value + '",\n'
+      out += keyVal+'"' + value + '",\n'
     }else {
-      out += prefix+'    "'+key + '": ' + value + ',\n'
+      out += keyVal + value + ',\n'
     }
   }
   return out.substring(0,out.length-1) + '\n'+prefix+']'
@@ -54,6 +58,22 @@ function assembleFromSingleValue(value, prefix) {
   }else {
     return value
   }
+}
+
+function flattenContributors(contributors) {
+  let out = {}
+  for (const [name, titles] of Object.entries(contributors)) {
+    for (const title of titles.split(/, and |, | and /)) {
+      if (!title) {
+        continue
+      }
+      if (!out[title]) {
+        out[title] = []
+      }
+      out[title].push(name)
+    }
+  }
+  return out
 }
 
 class InputHighlighted extends React.Component {
@@ -245,7 +265,42 @@ ${element.description}"""` : ''}${element.logoFile ? `
       output.innerHTML = hljs.highlight(outString, {language: 'groovy'}).value;
       return;
     } else if (lang === 'json') {
-      output.innerText = "Conversion from JSON is not supported yet.";
+      // eslint-disable-next-line no-template-curly-in-string
+      input = input.replace(/\${version}/, "${this.version}")
+      // eslint-disable-next-line no-template-curly-in-string
+      input = input.replace(/\${group}/, "${this.group}")
+      // eslint-disable-next-line no-template-curly-in-string
+      input = input.replace(/\${([a-zA-Z0-9_$]*)}/, "${this.buildProperties.$1}")
+      let parsed = {};
+      try {
+        parsed = JSON.parse(input);
+      } catch (e) {
+        console.log(e);
+        output.innerText = "Could not parse JSON.";
+        return;
+      }
+      let outString = `ModsDotGroovy.make {${parsed?.quilt_loader?.metadata?.license ? `
+    license = "${parsed.quilt_loader.metadata.license}"` : ''}${parsed?.quilt_loader?.metadata?.contact?.issues ? `
+    issueTrackerUrl = "${parsed.quilt_loader.metadata.contact.issues}"` : ''}${parsed?.quilt_loader?.metadata?.license ? `
+    license = "${parsed.quilt_loader.metadata.license}"` : ''}
+    mod {
+        modId = "${parsed.quilt_loader.id}"
+        group = "${parsed.quilt_loader.group}"${parsed?.quilt_loader?.provides ? `
+        provides = "${parsed.quilt_loader.provides}"` : ''}
+        version = "${parsed.quilt_loader.version}"${parsed?.quilt_loader?.metadata?.name ? `
+        displayName = "${parsed.quilt_loader.metadata.name}"` : ''}${parsed?.quilt_loader?.metadata?.description ? `
+        description = """
+${parsed.quilt_loader.metadata.description}"""` : ''}${parsed?.quilt_loader?.metadata?.contact?.homepage ? `
+        displayUrl = "${parsed.quilt_loader.metadata.contact.homepage}"` : ''}${parsed?.quilt_loader?.metadata?.contact ?
+          Object.entries(parsed?.quilt_loader?.metadata?.contact)
+          .filter(([key, value]) => key !== 'homepage' && key !== 'issues')
+          .map(([key, value]) => `
+        contact "${key}", "${value}"`).join('') : ''}${parsed?.quilt_loader?.metadata?.contributors ? `
+        contributors = ${assembleMapFromObject(flattenContributors(parsed.quilt_loader.metadata.contributors),'        ')}` : ''}${parsed?.quilt_loader?.metadata?.icon ? `
+        logoFile = "${parsed.quilt_loader.metadata.icon}"` : ''}
+    }
+}`
+      output.innerHTML = hljs.highlight(outString, {language: 'groovy'}).value;
       return;
     }
     output.innerHTML = "Unknown language \""+lang+"\"; something has gone terribly wrong";

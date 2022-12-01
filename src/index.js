@@ -1,3 +1,9 @@
+/*
+  Copyright (c) 2022 Luke Bemish.
+  Licensed under the MIT License (MIT), see
+  https://github.com/lukebemish/modsdotgroovy-converter
+*/
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
