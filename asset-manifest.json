@@ -1,23 +1,20 @@
 {
   "files": {
-    "main.css": "/modsdotgroovy-converter/static/css/main.e6c13ad2.css",
-    "main.js": "/modsdotgroovy-converter/static/js/main.15c321a0.js",
-    "static/css/892.e09c5743.chunk.css": "/modsdotgroovy-converter/static/css/892.e09c5743.chunk.css",
+    "main.js": "/modsdotgroovy-converter/static/js/main.efb4f1f8.js",
+    "static/css/892.0d247bc3.chunk.css": "/modsdotgroovy-converter/static/css/892.0d247bc3.chunk.css",
     "static/js/892.7b3f0caa.chunk.js": "/modsdotgroovy-converter/static/js/892.7b3f0caa.chunk.js",
-    "static/css/617.4448c59d.chunk.css": "/modsdotgroovy-converter/static/css/617.4448c59d.chunk.css",
+    "static/css/617.83aafd00.chunk.css": "/modsdotgroovy-converter/static/css/617.83aafd00.chunk.css",
     "static/js/617.cd7898ea.chunk.js": "/modsdotgroovy-converter/static/js/617.cd7898ea.chunk.js",
     "static/js/787.d96ec64a.chunk.js": "/modsdotgroovy-converter/static/js/787.d96ec64a.chunk.js",
     "index.html": "/modsdotgroovy-converter/index.html",
-    "main.e6c13ad2.css.map": "/modsdotgroovy-converter/static/css/main.e6c13ad2.css.map",
-    "main.15c321a0.js.map": "/modsdotgroovy-converter/static/js/main.15c321a0.js.map",
-    "892.e09c5743.chunk.css.map": "/modsdotgroovy-converter/static/css/892.e09c5743.chunk.css.map",
+    "main.efb4f1f8.js.map": "/modsdotgroovy-converter/static/js/main.efb4f1f8.js.map",
+    "892.0d247bc3.chunk.css.map": "/modsdotgroovy-converter/static/css/892.0d247bc3.chunk.css.map",
     "892.7b3f0caa.chunk.js.map": "/modsdotgroovy-converter/static/js/892.7b3f0caa.chunk.js.map",
-    "617.4448c59d.chunk.css.map": "/modsdotgroovy-converter/static/css/617.4448c59d.chunk.css.map",
+    "617.83aafd00.chunk.css.map": "/modsdotgroovy-converter/static/css/617.83aafd00.chunk.css.map",
     "617.cd7898ea.chunk.js.map": "/modsdotgroovy-converter/static/js/617.cd7898ea.chunk.js.map",
     "787.d96ec64a.chunk.js.map": "/modsdotgroovy-converter/static/js/787.d96ec64a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.e6c13ad2.css",
-    "static/js/main.15c321a0.js"
+    "static/js/main.efb4f1f8.js"
   ]
 }
