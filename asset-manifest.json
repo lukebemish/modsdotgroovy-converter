@@ -1,15 +1,23 @@
 {
   "files": {
-    "main.css": "/modsdotgroovy-converter/static/css/main.997c891a.css",
-    "main.js": "/modsdotgroovy-converter/static/js/main.44b16cc7.js",
+    "main.css": "/modsdotgroovy-converter/static/css/main.e6c13ad2.css",
+    "main.js": "/modsdotgroovy-converter/static/js/main.0c7ae767.js",
+    "static/css/892.e09c5743.chunk.css": "/modsdotgroovy-converter/static/css/892.e09c5743.chunk.css",
+    "static/js/892.7b3f0caa.chunk.js": "/modsdotgroovy-converter/static/js/892.7b3f0caa.chunk.js",
+    "static/css/617.4448c59d.chunk.css": "/modsdotgroovy-converter/static/css/617.4448c59d.chunk.css",
+    "static/js/617.cd7898ea.chunk.js": "/modsdotgroovy-converter/static/js/617.cd7898ea.chunk.js",
     "static/js/787.d96ec64a.chunk.js": "/modsdotgroovy-converter/static/js/787.d96ec64a.chunk.js",
     "index.html": "/modsdotgroovy-converter/index.html",
-    "main.997c891a.css.map": "/modsdotgroovy-converter/static/css/main.997c891a.css.map",
-    "main.44b16cc7.js.map": "/modsdotgroovy-converter/static/js/main.44b16cc7.js.map",
+    "main.e6c13ad2.css.map": "/modsdotgroovy-converter/static/css/main.e6c13ad2.css.map",
+    "main.0c7ae767.js.map": "/modsdotgroovy-converter/static/js/main.0c7ae767.js.map",
+    "892.e09c5743.chunk.css.map": "/modsdotgroovy-converter/static/css/892.e09c5743.chunk.css.map",
+    "892.7b3f0caa.chunk.js.map": "/modsdotgroovy-converter/static/js/892.7b3f0caa.chunk.js.map",
+    "617.4448c59d.chunk.css.map": "/modsdotgroovy-converter/static/css/617.4448c59d.chunk.css.map",
+    "617.cd7898ea.chunk.js.map": "/modsdotgroovy-converter/static/js/617.cd7898ea.chunk.js.map",
     "787.d96ec64a.chunk.js.map": "/modsdotgroovy-converter/static/js/787.d96ec64a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.997c891a.css",
-    "static/js/main.44b16cc7.js"
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.0c7ae767.js"
   ]
 }
