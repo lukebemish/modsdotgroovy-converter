@@ -78,6 +78,9 @@ function flattenContributors(contributors) {
 }
 
 function groovyStringify(value) {
+  if (value === undefined) {
+    return "'undefined'"
+  }
   if (value.includes("${")) {
     return '"'+value+'"'
   }
@@ -233,7 +236,7 @@ class App extends React.Component {
           return `def ${key} = ${assembleFromSingleValue(value,'')}\n`
         }) : ''}ModsDotGroovy.make {
     modLoader = ${groovyStringify(parsed.modLoader)}
-    loaderVersion = "${parsed.loaderVersion}"
+    loaderVersion = ${groovyStringify(parsed.loaderVersion)}
     license = ${groovyStringify(parsed.license)}${parsed.issueTrackerUrl ? `
     issueTrackerUrl = ${groovyStringify(parsed.issueTrackerUrl)}` : ''}${parsed.showAsResourcePack ? `
     showAsResourcePack = ${parsed.showAsResourcePack}` : ''}${
