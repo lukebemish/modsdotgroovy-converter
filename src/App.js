@@ -4,6 +4,7 @@ import { parse as parseTOML } from 'toml';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
+import { defaultQuiltModJson, defaultModsToml } from './defaults.js'
 
 library.add(faGithub)
 
@@ -17,14 +18,14 @@ function assembleMapFromObject(obj, prefix) {
   for (const [key, value] of Object.entries(obj)) {
     let keyVal = prefix+'    '+key+': '
     if (!key.match(/^[a-zA-Z_][a-zA-Z0-9_$]*$/)) {
-      keyVal = prefix+'    "'+key+'": '
+      keyVal = prefix+'    '+groovyStringify(key)+': '
     }
     if (Array.isArray(value)) {
       out += keyVal +assembleListFromArray(value, '    '+prefix)+",\n"
     } else if (typeof value === 'object') {
       out += keyVal +assembleMapFromObject(value, '    '+prefix)+",\n"
     } else if (typeof value === 'string') {
-      out += keyVal+'"' + value + '",\n'
+      out += keyVal+groovyStringify(value)+',\n'
     }else {
       out += keyVal + value + ',\n'
     }
@@ -40,7 +41,7 @@ function assembleListFromArray(arr, prefix) {
     } else if (typeof value === 'object') {
       out += prefix+'    '+assembleMapFromObject(value, '    '+prefix)+",\n"
     } else if (typeof value === 'string') {
-      out += prefix+'    "' + value + '",\n'
+      out += prefix+'    '+groovyStringify(value)+',\n'
     }else {
       out += prefix+'    '+value + ',\n'
     }
@@ -54,7 +55,7 @@ function assembleFromSingleValue(value, prefix) {
   } else if (typeof value === 'object') {
     return assembleMapFromObject(value, '    '+prefix)
   } else if (typeof value === 'string') {
-    return '"' + value + '"'
+    return groovyStringify(value)
   }else {
     return value
   }
@@ -76,6 +77,13 @@ function flattenContributors(contributors) {
   return out
 }
 
+function groovyStringify(value) {
+  if (value.includes("${")) {
+    return '"'+value+'"'
+  }
+  return '\''+value+'\''
+}
+
 function translateEntrypoint(value, prefix) {
   if (typeof value === 'string') {
     return '"'+value+'"'
@@ -84,7 +92,7 @@ function translateEntrypoint(value, prefix) {
   } else if (typeof value === 'object' && value.adapter) {
     return `adapted {
 ${prefix}    value = ${translateEntrypoint(value.value, prefix+'    ')}
-${prefix}    adapter = "${value.adapter}"
+${prefix}    adapter = ${groovyStringify(value.adapter)}
 ${prefix}}`
   } else if (typeof value === 'object') {
     return translateEntrypoint(value.value, prefix)
@@ -110,7 +118,7 @@ ${prefix}}`
 ${prefix}}`
   }
   return `mod("${modId}") {
-    ${prefix}version = "${versions ? versions : ""}"${optional !== null && optional ? `
+    ${prefix}version = ${groovyStringify(versions ? versions : "")}${optional !== null && optional ? `
     ${prefix}mandatory = ${mandatory}` : ''}
 ${prefix}}`
 }
@@ -224,24 +232,25 @@ class App extends React.Component {
       let outString = `${parsed.properties ? Object.entries(parsed.properties).map(([key, value]) => {
           return `def ${key} = ${assembleFromSingleValue(value,'')}\n`
         }) : ''}ModsDotGroovy.make {
-    modLoader = "${parsed.modLoader}"
+    modLoader = ${groovyStringify(parsed.modLoader)}
     loaderVersion = "${parsed.loaderVersion}"
-    license = "${parsed.license}"${parsed.issueTrackerUrl ? `
-    issueTrackerUrl = "${parsed.issueTrackerUrl}"` : ''}${parsed.showAsResourcePack ? `
+    license = ${groovyStringify(parsed.license)}${parsed.issueTrackerUrl ? `
+    issueTrackerUrl = ${groovyStringify(parsed.issueTrackerUrl)}` : ''}${parsed.showAsResourcePack ? `
     showAsResourcePack = ${parsed.showAsResourcePack}` : ''}${
       parsed.mods ? "\n    "+parsed.mods.map(element => {
         return `mod {
-        modId = "${element.modId}"
-        version = "${element.version ? element.version : '1'}"${element.displayName ? `
-        displayName = "${element.displayName}"` : ''}${element.description ? `
-        description = """
-${element.description}"""` : ''}${element.logoFile ? `
-        logoFile = "${element.logoFile}"` : ''}${element.logoBlur ? `
+        modId = ${groovyStringify(element.modId)}
+        version = ${groovyStringify(element.version ? element.version : '1')}${element.displayName ? `
+        displayName = ${groovyStringify(element.displayName)}` : ''}${element.description ? `
+        description = ${element.description.includes("${") ? '"""' : "'''"}
+${element.description}${element.description.includes("${") ? '"""' : "'''"}` : ''}${element.logoFile ? `
+        logoFile = ${groovyStringify(element.logoFile)}` : ''}${element.logoBlur ? `
         logoBlur = ${element.logoBlur}` : ''}${element.credits ? `
-        credits = "${element.credits}"` : ''}${element.authors ? `
-        authors = [${element.authors.split(/, and |, | and /).filter(author => author).map(author => author.trim()).filter(n => n).map(author => `"${author}"`).join(', ')}]` : ''}${element.displayURL ? `
-        displayUrl = "${element.displayURL}"` : ''}${element.updateJSONURL ? `
-        updateJsonUrl = "${element.updateJSONURL}"` : ''}${element.modproperties ? `
+        credits = ${groovyStringify(element.credits)}` : ''}${element.authors ? `
+        authors = [${element.authors.split(/, and |, | and /).filter(author => author).map(author => author.trim()).filter(n => n).map(author => `${groovyStringify(author)}`).join(', ')}]` : ''}${element.displayURL ? `
+        displayUrl = ${groovyStringify(element.displayURL)}` : ''}${element.updateJSONURL ? `
+        updateJsonUrl = ${groovyStringify(element.updateJSONURL)}` : ''}${element.displayTest ? `
+        displayTest = ${groovyStringify(element.displayTest)}` : ''}${element.modproperties ? `
         properties = ${assembleMapFromObject(element.modproperties, '        ')}` : ''}${parsed.dependencies && parsed.dependencies[element.modId] ? `
         dependencies {
             ${parsed.dependencies[element.modId].map(dependency => {
@@ -289,8 +298,8 @@ ${element.description}"""` : ''}${element.logoFile ? `
                   ordering = ${ordering}` : ''}
             }`
               }
-              return `mod("${modId}") {
-                version = "${dependency.versionRange ? dependency.versionRange : ""}"${dependency.side && dependency.side !== 'BOTH' ? `
+              return `mod(${groovyStringify(modId)}) {
+                version = ${groovyStringify(dependency.versionRange ? dependency.versionRange : "")}${dependency.side && dependency.side !== 'BOTH' ? `
                 side = ${side}` : ''}${dependency.mandatory !== null && !dependency.mandatory ? `
                 mandatory = ${dependency.mandatory}` : ''}${dependency.ordering && dependency.ordering !== 'NONE' ? `
                 ordering = ${ordering}` : ''}
@@ -319,29 +328,29 @@ ${element.description}"""` : ''}${element.logoFile ? `
         return;
       }
       let outString = `ModsDotGroovy.make {${parsed?.quilt_loader?.metadata?.license ? `
-    license = "${parsed.quilt_loader.metadata.license}"` : ''}${parsed?.quilt_loader?.metadata?.contact?.issues ? `
-    issueTrackerUrl = "${parsed.quilt_loader.metadata.contact.issues}"` : ''}${parsed?.quilt_loader?.metadata?.license ? `
-    license = "${parsed.quilt_loader.metadata.license}"` : ''}
+    license = ${groovyStringify(parsed.quilt_loader.metadata.license)}` : ''}${parsed?.quilt_loader?.metadata?.contact?.issues ? `
+    issueTrackerUrl = ${groovyStringify(parsed.quilt_loader.metadata.contact.issues)}` : ''}${parsed?.quilt_loader?.metadata?.license ? `
+    license = ${groovyStringify(parsed.quilt_loader.metadata.license)}` : ''}
     mod {
-        modId = "${parsed.quilt_loader.id}"
-        group = "${parsed.quilt_loader.group}"${parsed?.quilt_loader?.provides ? `
-        provides = "${parsed.quilt_loader.provides}"` : ''}
-        version = "${parsed.quilt_loader.version}"${parsed?.quilt_loader?.metadata?.name ? `
-        displayName = "${parsed.quilt_loader.metadata.name}"` : ''}${parsed?.quilt_loader?.metadata?.description ? `
-        description = """
-${parsed.quilt_loader.metadata.description}"""` : ''}${parsed?.quilt_loader?.metadata?.contact?.homepage ? `
-        displayUrl = "${parsed.quilt_loader.metadata.contact.homepage}"` : ''}${parsed?.quilt_loader?.metadata?.contact ?
+        modId = ${groovyStringify(parsed.quilt_loader.id)}
+        group = ${groovyStringify(parsed.quilt_loader.group)}${parsed?.quilt_loader?.provides ? `
+        provides = ${groovyStringify(parsed.quilt_loader.provides)}` : ''}
+        version = ${groovyStringify(parsed.quilt_loader.version)}${parsed?.quilt_loader?.metadata?.name ? `
+        displayName = ${groovyStringify(parsed.quilt_loader.metadata.name)}` : ''}${parsed?.quilt_loader?.metadata?.description ? `
+        description = ${parsed.quilt_loader.metadata.description.includes('${') ? '"""' : "'''"}
+${parsed.quilt_loader.metadata.description}${parsed.quilt_loader.metadata.description.includes('${') ? '"""' : "'''"}` : ''}${parsed?.quilt_loader?.metadata?.contact?.homepage ? `
+        displayUrl = ${groovyStringify(parsed.quilt_loader.metadata.contact.homepage)}` : ''}${parsed?.quilt_loader?.metadata?.contact ?
           Object.entries(parsed?.quilt_loader?.metadata?.contact)
           .filter(([key, value]) => key !== 'homepage' && key !== 'issues')
           .map(([key, value]) => `
-        contact "${key}", "${value}"`).join('') : ''}${parsed?.quilt_loader?.metadata?.contributors ? `
+        contact ${groovyStringify(key)}, ${groovyStringify(value)}`).join('') : ''}${parsed?.quilt_loader?.metadata?.contributors ? `
         contributors = ${assembleMapFromObject(flattenContributors(parsed.quilt_loader.metadata.contributors),'        ')}` : ''}${parsed?.quilt_loader?.metadata?.icon ? `
-        logoFile = "${parsed.quilt_loader.metadata.icon}"` : ''}${parsed?.quilt_loader?.entrypoints ? `
+        logoFile = ${groovyStringify(parsed.quilt_loader.metadata.icon)}` : ''}${parsed?.quilt_loader?.entrypoints ? `
         entrypoints {${Object.entries(parsed.quilt_loader.entrypoints).map(([key, value]) => (isValidGroovyName(key) ? `
             ${key} = ${translateEntrypoint(value)}` : `
-            entrypoint "${key}", ${translateEntrypoint(value, '            ')}`)).join('')}
+            entrypoint ${groovyStringify(key)}, ${translateEntrypoint(value, '            ')}`)).join('')}
         }` : ''}${parsed?.quilt_loader?.intermediate_mappings && parsed.quilt_loader.intermediate_mappings !== 'net.fabricmc:intermediary' ? `
-        intermediateMappings = "${parsed.quilt_loader.intermediate_mappings}"` : ''}${parsed?.quilt_loader?.plugins ?`
+        intermediateMappings = ${groovyStringify(parsed.quilt_loader.intermediate_mappings)}` : ''}${parsed?.quilt_loader?.plugins ?`
         plugins = ${assembleFromSingleValue(parsed.quilt_loader.plugins,'        ')}`: ''}${parsed?.quilt_loader?.jars ? `
         jars = ${assembleFromSingleValue(parsed.quilt_loader.jars,'        ')}` : ''}${parsed?.quilt_loader?.language_adapters ? `
         language_adapters = ${assembleFromSingleValue(parsed.quilt_loader.language_adapters,'        ')}` : ''}${parsed?.quilt_loader?.load_type ? `
@@ -370,10 +379,10 @@ ${parsed.quilt_loader.metadata.description}"""` : ''}${parsed?.quilt_loader?.met
           </Panel.Header>
           <Tabs langSetter={this.setLang}>
             <Tab label="mods.toml" lang="toml">
-              <InputHighlighted initialValue="# Paste mods.toml here."/>
+              <InputHighlighted initialValue={defaultModsToml}/>
             </Tab>
             <Tab label="quilt.mod.json" lang="json">
-              <InputHighlighted initialValue="// Paste quilt.mod.json here."/>
+              <InputHighlighted initialValue={defaultQuiltModJson}/>
             </Tab>
           </Tabs>
           <Button onClick={this.convert}>{"Convert"}</Button>
