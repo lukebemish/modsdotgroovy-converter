@@ -245,8 +245,7 @@ class App extends React.Component {
         modId = ${groovyStringify(element.modId)}
         version = ${groovyStringify(element.version ? element.version : '1')}${element.displayName ? `
         displayName = ${groovyStringify(element.displayName)}` : ''}${element.description ? `
-        description = ${element.description.includes("${") ? '"""' : "'''"}
-${element.description}${element.description.includes("${") ? '"""' : "'''"}` : ''}${element.logoFile ? `
+        description = ${element.description.includes("${") ? '"""' : "'''"}${element.description}${element.description.includes("${") ? '"""' : "'''"}` : ''}${element.logoFile ? `
         logoFile = ${groovyStringify(element.logoFile)}` : ''}${element.logoBlur ? `
         logoBlur = ${element.logoBlur}` : ''}${element.credits ? `
         credits = ${groovyStringify(element.credits)}` : ''}${element.authors ? `
@@ -340,8 +339,7 @@ ${element.description}${element.description.includes("${") ? '"""' : "'''"}` : '
         provides = ${groovyStringify(parsed.quilt_loader.provides)}` : ''}
         version = ${groovyStringify(parsed.quilt_loader.version)}${parsed?.quilt_loader?.metadata?.name ? `
         displayName = ${groovyStringify(parsed.quilt_loader.metadata.name)}` : ''}${parsed?.quilt_loader?.metadata?.description ? `
-        description = ${parsed.quilt_loader.metadata.description.includes('${') ? '"""' : "'''"}
-${parsed.quilt_loader.metadata.description}${parsed.quilt_loader.metadata.description.includes('${') ? '"""' : "'''"}` : ''}${parsed?.quilt_loader?.metadata?.contact?.homepage ? `
+        description = ${parsed.quilt_loader.metadata.description.includes('${') ? '"""' : "'''"}${parsed.quilt_loader.metadata.description}${parsed.quilt_loader.metadata.description.includes('${') ? '"""' : "'''"}` : ''}${parsed?.quilt_loader?.metadata?.contact?.homepage ? `
         displayUrl = ${groovyStringify(parsed.quilt_loader.metadata.contact.homepage)}` : ''}${parsed?.quilt_loader?.metadata?.contact ?
           Object.entries(parsed?.quilt_loader?.metadata?.contact)
           .filter(([key, value]) => key !== 'homepage' && key !== 'issues')
@@ -388,7 +386,7 @@ ${parsed.quilt_loader.metadata.description}${parsed.quilt_loader.metadata.descri
               <InputHighlighted initialValue={defaultQuiltModJson}/>
             </Tab>
           </Tabs>
-          <Button onClick={this.convert}>{"Convert"}</Button>
+          <Button color="link" onClick={this.convert}>{"Convert"}</Button>
         </Panel>
         <Panel style={{overflow: "auto"}}>
           <Panel.Header>
