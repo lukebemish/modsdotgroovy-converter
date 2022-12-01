@@ -340,7 +340,7 @@ ${parsed.quilt_loader.metadata.description}"""` : ''}${parsed?.quilt_loader?.met
         entrypoints {${Object.entries(parsed.quilt_loader.entrypoints).map(([key, value]) => (isValidGroovyName(key) ? `
             ${key} = ${translateEntrypoint(value)}` : `
             entrypoint "${key}", ${translateEntrypoint(value, '            ')}`)).join('')}
-        }` : ''}${parsed?.quilt_loader?.intermediate_mappings && parsed.quilt_loader.intermediate_mappings !== 'net.fabric:intermediary' ? `
+        }` : ''}${parsed?.quilt_loader?.intermediate_mappings && parsed.quilt_loader.intermediate_mappings !== 'net.fabricmc:intermediary' ? `
         intermediateMappings = "${parsed.quilt_loader.intermediate_mappings}"` : ''}${parsed?.quilt_loader?.plugins ?`
         plugins = ${assembleFromSingleValue(parsed.quilt_loader.plugins,'        ')}`: ''}${parsed?.quilt_loader?.jars ? `
         jars = ${assembleFromSingleValue(parsed.quilt_loader.jars,'        ')}` : ''}${parsed?.quilt_loader?.language_adapters ? `
