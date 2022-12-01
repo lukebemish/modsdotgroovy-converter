@@ -44,6 +44,18 @@ function assembleListFromArray(arr, prefix) {
   return out.substring(0,out.length-1) + '\n'+prefix+']'
 }
 
+function assembleFromSingleValue(value, prefix) {
+  if (Array.isArray(value)) {
+    return assembleListFromArray(value, '    '+prefix)
+  } else if (typeof value === 'object') {
+    return assembleMapFromObject(value, '    '+prefix)
+  } else if (typeof value === 'string') {
+    return '"' + value + '"'
+  }else {
+    return value
+  }
+}
+
 class InputHighlighted extends React.Component {
   constructor(props) {
     super(props);
@@ -134,10 +146,14 @@ class App extends React.Component {
   }
 
   convert() {
-    const input = document.querySelector('.contents-switchable textarea').value;
+    let input = document.querySelector('.contents-switchable textarea').value;
     const lang = this.state.lang;
     const output = document.querySelector('#output');
     if (lang === 'toml') {
+      // eslint-disable-next-line no-template-curly-in-string
+      input = input.replace(/\${file\.jarVersion}/, "${this.version}")
+      // eslint-disable-next-line no-template-curly-in-string
+      input = input.replace(/\${file.([a-zA-Z0-9_$]*)}/, "${$1}")
       let parsed = {};
       try {
         parsed = parseTOML(input);
@@ -146,7 +162,9 @@ class App extends React.Component {
         output.innerText = "Could not parse TOML.";
         return;
       }
-        let outString = `ModsDotGroovy.make {
+      let outString = `${parsed.properties ? Object.entries(parsed.properties).map(([key, value]) => {
+          return `def ${key} = ${assembleFromSingleValue(value,'')}\n`
+        }) : ''}ModsDotGroovy.make {
     modLoader = "${parsed.modLoader}"
     loaderVersion = "${parsed.loaderVersion}"
     license = "${parsed.license}"${parsed.issueTrackerUrl ? `
@@ -180,6 +198,8 @@ ${element.description}"""` : ''}${element.logoFile ? `
                 case "AFTER":
                   ordering = "DependencyOrdering.AFTER"
                   break;
+                default:
+                  break;
               }
               let side = ""
               switch (dependency.side) {
@@ -191,6 +211,8 @@ ${element.description}"""` : ''}${element.logoFile ? `
                   break;
                 case "SERVER":
                   side = "DependencySide.SERVER"
+                  break;
+                default:
                   break;
               }
               if (modId === "minecraft") {
