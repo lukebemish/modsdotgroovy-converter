@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/modsdotgroovy-converter/static/css/main.997c891a.css",
-    "main.js": "/modsdotgroovy-converter/static/js/main.61749a20.js",
+    "main.js": "/modsdotgroovy-converter/static/js/main.44b16cc7.js",
     "static/js/787.d96ec64a.chunk.js": "/modsdotgroovy-converter/static/js/787.d96ec64a.chunk.js",
     "index.html": "/modsdotgroovy-converter/index.html",
     "main.997c891a.css.map": "/modsdotgroovy-converter/static/css/main.997c891a.css.map",
-    "main.61749a20.js.map": "/modsdotgroovy-converter/static/js/main.61749a20.js.map",
+    "main.44b16cc7.js.map": "/modsdotgroovy-converter/static/js/main.44b16cc7.js.map",
     "787.d96ec64a.chunk.js.map": "/modsdotgroovy-converter/static/js/787.d96ec64a.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.997c891a.css",
-    "static/js/main.61749a20.js"
+    "static/js/main.44b16cc7.js"
   ]
 }
