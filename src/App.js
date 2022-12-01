@@ -1,5 +1,3 @@
-import './App.scss';
-import 'highlight.js/styles/atom-one-light.css';
 import { Button, Panel } from 'react-bulma-components';
 import React from 'react';
 import { parse as parseTOML } from 'toml';

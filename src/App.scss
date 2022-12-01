@@ -1,5 +1,3 @@
-@import "../node_modules/bulma/bulma.sass";
-
 .highlight-editable textarea, .highlight-editable {
     border: none;
     outline: none;
@@ -33,6 +31,7 @@
     flex-flow: row nowrap;
     justify-content: justify-content;
     gap: 10px;
+    padding: 10px;
     align-items: stretch;
     align-content: stretch;
     width: 100%;
