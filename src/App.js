@@ -10,6 +10,8 @@ library.add(faGithub)
 const hljs = require('highlight.js/lib/core');
 hljs.registerLanguage('groovy', require('highlight.js/lib/languages/groovy'));
 
+const isValidGroovyName = name => name.match(/^[a-zA-Z_][a-zA-Z0-9_$]*$/)
+
 function assembleMapFromObject(obj, prefix) {
   let out = '[\n'
   for (const [key, value] of Object.entries(obj)) {
@@ -72,6 +74,45 @@ function flattenContributors(contributors) {
     }
   }
   return out
+}
+
+function translateEntrypoint(value, prefix) {
+  if (typeof value === 'string') {
+    return '"'+value+'"'
+  } else if (Array.isArray(value)) {
+    return '[\n'+value.map(v => translateEntrypoint(v, prefix+'    ')).join(', \n')+'\n'+prefix+']'
+  } else if (typeof value === 'object' && value.adapter) {
+    return `adapted {
+${prefix}    value = ${translateEntrypoint(value.value, prefix+'    ')}
+${prefix}    adapter = "${value.adapter}"
+${prefix}}`
+  } else if (typeof value === 'object') {
+    return translateEntrypoint(value.value, prefix)
+  }
+}
+
+function assembleDependencyQuilt(dependency, prefix) {
+  let modId = dependency.id;
+  let versions = dependency.versions;
+  //let reason = dependency.reason;
+  //let unless = dependnecy.unless;
+  let optional = dependency.optional;
+  let mandatory = !optional;
+  if (modId === "minecraft") {
+    return `minecraft {
+    ${prefix}version = this.minecraftVersionRange${optional !== null && optional ? `
+    ${prefix}mandatory = ${mandatory}` : ''}
+${prefix}}`
+  } else if (modId === "quilt_loader") {
+    return `quiltLoader {
+      ${prefix}version = ">=\${this.quiltLoaderVersion}"${optional !== null && optional ? `
+      ${prefix}mandatory = ${mandatory}` : ''}
+${prefix}}`
+  }
+  return `mod("${modId}") {
+    ${prefix}version = "${versions ? versions : ""}"${optional !== null && optional ? `
+    ${prefix}mandatory = ${mandatory}` : ''}
+${prefix}}`
 }
 
 class InputHighlighted extends React.Component {
@@ -295,8 +336,24 @@ ${parsed.quilt_loader.metadata.description}"""` : ''}${parsed?.quilt_loader?.met
           .map(([key, value]) => `
         contact "${key}", "${value}"`).join('') : ''}${parsed?.quilt_loader?.metadata?.contributors ? `
         contributors = ${assembleMapFromObject(flattenContributors(parsed.quilt_loader.metadata.contributors),'        ')}` : ''}${parsed?.quilt_loader?.metadata?.icon ? `
-        logoFile = "${parsed.quilt_loader.metadata.icon}"` : ''}
-    }
+        logoFile = "${parsed.quilt_loader.metadata.icon}"` : ''}${parsed?.quilt_loader?.entrypoints ? `
+        entrypoints {${Object.entries(parsed.quilt_loader.entrypoints).map(([key, value]) => (isValidGroovyName(key) ? `
+            ${key} = ${translateEntrypoint(value)}` : `
+            entrypoint "${key}", ${translateEntrypoint(value, '            ')}`)).join('')}
+        }` : ''}${parsed?.quilt_loader?.intermediate_mappings && parsed.quilt_loader.intermediate_mappings !== 'net.fabric:intermediary' ? `
+        intermediateMappings = "${parsed.quilt_loader.intermediate_mappings}"` : ''}${parsed?.quilt_loader?.plugins ?`
+        plugins = ${assembleFromSingleValue(parsed.quilt_loader.plugins,'        ')}`: ''}${parsed?.quilt_loader?.jars ? `
+        jars = ${assembleFromSingleValue(parsed.quilt_loader.jars,'        ')}` : ''}${parsed?.quilt_loader?.language_adapters ? `
+        language_adapters = ${assembleFromSingleValue(parsed.quilt_loader.language_adapters,'        ')}` : ''}${parsed?.quilt_loader?.load_type ? `
+        load_type = ${assembleFromSingleValue(parsed.quilt_loader.load_type,'        ')}` : ''}${parsed?.quilt_loader?.repositories ? `
+        repositories = ${assembleFromSingleValue(parsed.quilt_loader.repositories,'        ')}` : ''}${parsed?.quilt_loader?.depends ? `
+        dependencies {
+            ${parsed.quilt_loader.depends.map(dependency => assembleDependencyQuilt(dependency,'            ')).join('\n            ')}
+        }` : ''}
+    }${parsed?.mixin ?`
+    mixin = ${assembleFromSingleValue(parsed.mixin,'    ')}`: ''}${parsed?.access_widener ?`
+    access_widener = ${assembleFromSingleValue(parsed.access_widener,'    ')}`: ''}${parsed?.minecraft ?`
+    minecraft = ${assembleFromSingleValue(parsed.minecraft,'    ')}`: ''}
 }`
       output.innerHTML = hljs.highlight(outString, {language: 'groovy'}).value;
       return;
