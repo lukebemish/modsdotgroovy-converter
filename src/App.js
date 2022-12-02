@@ -127,7 +127,7 @@ ${prefix}}`
     return `${modId} {
     ${prefix}version = ${groovyStringify(versions ? versions : "")}${optional !== null && optional ? `
     ${prefix}mandatory = ${mandatory}` : ''}
-  ${prefix}}`
+${prefix}}`
   }
   return `mod("${modId}") {
     ${prefix}version = ${groovyStringify(versions ? versions : "")}${optional !== null && optional ? `
