@@ -109,16 +109,25 @@ function assembleDependencyQuilt(dependency, prefix) {
   //let unless = dependnecy.unless;
   let optional = dependency.optional;
   let mandatory = !optional;
-  if (modId === "minecraft") {
+  if (modId === "minecraft" && mandatory) {
+    return `minecraft = this.minecraftVersionRange`
+  } else if (modId === "minecraft") {
     return `minecraft {
     ${prefix}version = this.minecraftVersionRange${optional !== null && optional ? `
     ${prefix}mandatory = ${mandatory}` : ''}
 ${prefix}}`
+  } else if (modId === "quilt_loader" && mandatory) {
+    return `quiltLoader = ">=\${this.quiltLoaderVersion}"`
   } else if (modId === "quilt_loader") {
     return `quiltLoader {
-      ${prefix}version = ">=\${this.quiltLoaderVersion}"${optional !== null && optional ? `
-      ${prefix}mandatory = ${mandatory}` : ''}
+    ${prefix}version = ">=\${this.quiltLoaderVersion}"${optional !== null && optional ? `
+    ${prefix}mandatory = ${mandatory}` : ''}
 ${prefix}}`
+  } else if (isValidGroovyName(modId)) {
+    return `${modId} {
+    ${prefix}version = ${groovyStringify(versions ? versions : "")}${optional !== null && optional ? `
+    ${prefix}mandatory = ${mandatory}` : ''}
+  ${prefix}}`
   }
   return `mod("${modId}") {
     ${prefix}version = ${groovyStringify(versions ? versions : "")}${optional !== null && optional ? `
@@ -285,19 +294,30 @@ class App extends React.Component {
                 default:
                   break;
               }
-              if (modId === "minecraft") {
+              if (modId === "minecraft" && dependency.side === 'BOTH' && dependency.mandatory && dependency.ordering === 'NONE') {
+                return `minecraft = this.minecraftVersionRange`
+              } else if (modId === "minecraft") {
                 return `minecraft {
                 version = this.minecraftVersionRange${dependency.side && dependency.side !== 'BOTH' ? `
                 side = ${side}` : ''}${dependency.mandatory !== null && !dependency.mandatory ? `
                 mandatory = ${dependency.mandatory}` : ''}${dependency.ordering && dependency.ordering !== 'NONE' ? `
                 ordering = ${ordering}` : ''}
             }`
+              } else if (modId === "forge" && dependency.side === 'BOTH' && dependency.mandatory && dependency.ordering === 'NONE') {
+                return `forge = ">=\${this.forgeVersion}"`
               } else if (modId === "forge") {
                 return `forge {
-                  version = ">=\${this.forgeVersion}"${dependency.side && dependency.side !== 'BOTH' ? `
-                  side = ${side}` : ''}${dependency.mandatory !== null && !dependency.mandatory ? `
-                  mandatory = ${dependency.mandatory}` : ''}${dependency.ordering && dependency.ordering !== 'NONE' ? `
-                  ordering = ${ordering}` : ''}
+                version = ">=\${this.forgeVersion}"${dependency.side && dependency.side !== 'BOTH' ? `
+                side = ${side}` : ''}${dependency.mandatory !== null && !dependency.mandatory ? `
+                mandatory = ${dependency.mandatory}` : ''}${dependency.ordering && dependency.ordering !== 'NONE' ? `
+                ordering = ${ordering}` : ''}
+            }`
+              } else if (isValidGroovyName(modId)) {
+                return `${modId} {
+                version = ${groovyStringify(dependency.versionRange ? dependency.versionRange : "")}${dependency.side && dependency.side !== 'BOTH' ? `
+                side = ${side}` : ''}${dependency.mandatory !== null && !dependency.mandatory ? `
+                mandatory = ${dependency.mandatory}` : ''}${dependency.ordering && dependency.ordering !== 'NONE' ? `
+                ordering = ${ordering}` : ''}
             }`
               }
               return `mod(${groovyStringify(modId)}) {
