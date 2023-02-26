@@ -1,7 +1,7 @@
 {
   "name": "modsdotgroovy-converter",
   "version": "0.1.0",
-  "homepage": "https://pages.lukebemish.dev/modsdotgroovy-converter",
+  "homepage": "https://lukebemish.dev/modsdotgroovy-converter",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.2.1",
